@@ -15,6 +15,6 @@
 
   - name: fetch the client ovpn config
     fetch:
-      src: hp.ovpn
-      dest: /opt/ovpn_config/
+      src: client.ovpn
+      dest: /tmp/
       flat: true

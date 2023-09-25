@@ -23,8 +23,8 @@ def run_ansible():
     os.chdir("../")
     return True
 
-if not os.path.exists("/opt/ovpn_config"):
-    os.mkdir("/opt/ovpn_config")
+if os.path.exists("/tmp/client.ovpn"):
+    os.remove("/tmp/client.ovpn")
 run_terraform()
 time.sleep(30)
 run_ansible()
@@ -33,6 +33,6 @@ try:
     sh.nmcli("connection", "delete", "client")
 except:
     pass
-sh.nmcli("connection", "import", "type", "openvpn", "file", "/opt/ovpn_config/client.ovpn")
+sh.nmcli("connection", "import", "type", "openvpn", "file", "/tmp/client.ovpn")
 print("Setup Completed!")
 
