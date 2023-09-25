@@ -3,12 +3,18 @@ import sh
 import os
 import time
 import sys
+import argparse
 
 
-def run_terraform():
+
+def destroy_iac():
     os.chdir("./IAC")
     print("Destroying resources")
     sh.terraform("destroy", "-auto-approve",  _out=sys.stdout, _err=sys.stderr)
+
+
+def run_terraform():
+    destroy_iac()
     print("Creating resouces")
     sh.terraform("apply", "-auto-approve",  _out=sys.stdout, _err=sys.stderr)
     print("Updating inventory")
@@ -23,16 +29,27 @@ def run_ansible():
     os.chdir("../")
     return True
 
+def remove_connection():
+    # remove connection if already exists
+    try:
+        sh.nmcli("connection", "delete", "client")
+    except:
+        pass
+
+remove_connection()
 if os.path.exists("/tmp/client.ovpn"):
     os.remove("/tmp/client.ovpn")
-run_terraform()
-time.sleep(30)
-run_ansible()
-# add ovpn to network manager
-try:
-    sh.nmcli("connection", "delete", "client")
-except:
-    pass
-sh.nmcli("connection", "import", "type", "openvpn", "file", "/tmp/client.ovpn")
-print("Setup Completed!")
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-a', '--action', dest="action", required=True, help="Action to perform, create/destroy")
+action = vars(parser.parse_args()).get("action",'').lower().strip()
+
+if action == 'destroy':
+    destroy_iac()
+elif action == 'create':
+    run_terraform()
+    time.sleep(30)
+    run_ansible()
+    sh.nmcli("connection", "import", "type", "openvpn", "file", "/tmp/client.ovpn")
+    print("Setup Completed!")
 
