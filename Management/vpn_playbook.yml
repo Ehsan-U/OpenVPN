@@ -1,0 +1,20 @@
+
+
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: install openvpn
+    script: ../Bash/openvpn-install.sh
+    environment:
+      AUTO_INSTALL: y
+      CLIENT: client
+      DNS: 9
+
+  - name: fetch the client ovpn config
+    fetch:
+      src: hp.ovpn
+      dest: /opt/ovpn_config/
+      flat: true
